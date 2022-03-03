@@ -1,0 +1,20 @@
+---
+- name: Replace Arista EOS Configurations
+  connection: local
+  hosts: arista-eos
+  gather_facts: no
+  tags: eos
+  vars:
+    napalm_creds:
+      hostname: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      dev_os: "{{ napalm_network_os }}"
+      optional_args:
+        port: "{{ eapi_port }}"
+  tasks:
+    - napalm_install_config:
+        provider: "{{ napalm_creds }}"
+        config_file: "backup/{{ inventory_hostname }}_config"
+        commit_changes: True
+        replace_config: True

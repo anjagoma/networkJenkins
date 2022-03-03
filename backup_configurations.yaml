@@ -1,0 +1,32 @@
+---
+- name: Ensure Configs Directory Preset
+  connection: local
+  hosts: localhost
+  gather_facts: no
+  tags: always
+  tasks:
+    - file:
+        path: backup/
+        state: directory
+
+- name: Backup Arista EOS Configurations
+  connection: local
+  hosts: arista-eos
+  gather_facts: no
+  tags: eos
+  vars:
+    napalm_creds:
+      hostname: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      dev_os: "{{ napalm_network_os }}"
+      optional_args:
+        port: "{{ eapi_port }}"
+  tasks:
+    - napalm_get_facts:
+        provider: "{{ napalm_creds }}"
+        filter: "config"
+      register: config
+    - copy:
+        content: "{{ config['ansible_facts']['napalm_config']['running'] }}"
+        dest: "backup/{{ inventory_hostname }}_config"
